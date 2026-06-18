@@ -30,7 +30,8 @@ def _existing_keys(path: Path) -> set:
                 line = line.strip()
                 if line:
                     d = json.loads(line)
-                    keys.add((d["topology"], d["question_id"], d["seed"]))
+                    if d.get("error") is None:  # only successful runs count as done
+                        keys.add((d["topology"], d["question_id"], d["seed"]))
     return keys
 
 
