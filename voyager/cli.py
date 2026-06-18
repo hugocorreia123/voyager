@@ -1,14 +1,13 @@
-"""Run a single question through a topology and print the instrumented result.
+"""Run a single question through a chosen topology.
 
-    uv run voyager "Compare the latest quarterly earnings of NVIDIA and AMD."
-    # or:
-    uv run python -m voyager.cli "your question"
+    uv run voyager "your question"                  # default: react
+    uv run voyager -t single_shot "your question"   # pick a topology
 """
 from __future__ import annotations
 
-import sys
+import argparse
 
-from voyager.topologies.react import ReActTopology
+from voyager.topologies import TOPOLOGIES
 
 DEFAULT_Q = (
     "What is the most recent Llama model Meta has released, and what are its "
@@ -17,12 +16,22 @@ DEFAULT_Q = (
 
 
 def main() -> None:
-    question = " ".join(sys.argv[1:]).strip() or DEFAULT_Q
-    topo = ReActTopology()
+    parser = argparse.ArgumentParser(prog="voyager")
+    parser.add_argument("question", nargs="*", help="question to answer")
+    parser.add_argument(
+        "-t",
+        "--topology",
+        default="react",
+        choices=sorted(TOPOLOGIES),
+        help="agent topology to use",
+    )
+    args = parser.parse_args()
 
-    print(f"\nQ: {question}\n")
+    question = " ".join(args.question).strip() or DEFAULT_Q
+    topo = TOPOLOGIES[args.topology]()
+
+    print(f"\n[{args.topology}] Q: {question}\n")
     r = topo.run(question)
-
     print(f"--- Answer [{r.topology}] ---\n{r.answer}\n")
     print(
         f"steps={r.steps}  tools={r.tool_calls}  "
