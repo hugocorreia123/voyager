@@ -1,0 +1,28 @@
+[project]
+name = "voyager"
+version = "0.1.0"
+description = "Agentic research platform with rigorous, human-validated evaluation"
+requires-python = ">=3.11"
+dependencies = [
+    "langgraph>=0.2",
+    "langchain-core>=0.3",
+    "langchain-groq>=0.2",
+    "ddgs>=6.0",
+    "arxiv>=2.1",
+    "python-dotenv>=1.0",
+]
+
+[project.optional-dependencies]
+# Added in later phases: eval harness, stats, app
+eval = ["scipy>=1.13", "statsmodels>=0.14", "pandas>=2.2"]
+app = ["streamlit>=1.40", "plotly>=5.24"]
+
+[project.scripts]
+voyager = "voyager.cli:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["voyager"]
