@@ -14,7 +14,7 @@ from langchain_groq import ChatGroq
 load_dotenv()
 
 # Same model across every topology — this is a methodological requirement.
-DEFAULT_MODEL = "llama-3.3-70b-versatile"
+DEFAULT_MODEL = "qwen/qwen3-32b"
 
 
 def get_llm(model: str = DEFAULT_MODEL, temperature: float = 0.0) -> ChatGroq:
