@@ -1,46 +1,65 @@
-"""Shared tool layer.
+"""Shared tools for every topology: web_search and arxiv_search.
 
-Every topology gets the SAME tools, for the same reason the model is shared:
-to isolate the effect of topology. Add SEC EDGAR and a code sandbox in later
-phases (categories: quantitative/financial reasoning, tool-use-heavy).
+web_search prefers Tavily when TAVILY_API_KEY is set — Tavily is a real search
+API that works from any IP, including datacenters like Hugging Face Spaces — and
+falls back to DuckDuckGo (ddgs) when no key is present. So it runs locally with
+no key, and runs *reliably* on the Space once the key is set.
 """
 from __future__ import annotations
+
+import os
 
 from langchain_core.tools import tool
 
 
 @tool
 def web_search(query: str) -> str:
-    """Search the web for current information. Use for recent events, facts,
-    companies, and anything not in the model's training data. Returns the top
-    results as text."""
-    from ddgs import DDGS
+    """Search the web for current information. Returns the top results as text."""
+    # Prefer Tavily when a key is available (reliable from datacenter IPs).
+    if os.getenv("TAVILY_API_KEY"):
+        try:
+            from tavily import TavilyClient
+            client = TavilyClient(api_key=os.environ["TAVILY_API_KEY"])
+            results = client.search(query, max_results=5).get("results", [])
+            if results:
+                return "\n\n".join(
+                    f"{r.get('title', '')}\n{r.get('url', '')}\n{r.get('content', '')}"
+                    for r in results
+                )
+        except Exception:
+            pass  # fall through to DuckDuckGo on any Tavily error
 
-    with DDGS() as ddgs:
-        results = list(ddgs.text(query, max_results=5))
-    if not results:
-        return "No results found."
-    return "\n\n".join(
-        f"{r.get('title', '')}\n{r.get('href', '')}\n{r.get('body', '')}"
-        for r in results
-    )
+    # Fallback: DuckDuckGo (no key, but rate-limited from shared/datacenter IPs).
+    try:
+        from ddgs import DDGS
+        with DDGS() as ddgs:
+            hits = list(ddgs.text(query, max_results=5))
+        if not hits:
+            return "No results found."
+        return "\n\n".join(
+            f"{h.get('title', '')}\n{h.get('href', '')}\n{h.get('body', '')}"
+            for h in hits
+        )
+    except Exception as e:
+        return f"web_search error: {e}"
 
 
 @tool
 def arxiv_search(query: str) -> str:
-    """Search ArXiv for academic papers. Use for research questions, methods,
-    and technical topics. Returns titles, authors, and abstracts."""
-    import arxiv
+    """Search arXiv for academic papers. Returns titles, authors, and summaries."""
+    try:
+        import arxiv
+        search = arxiv.Search(
+            query=query, max_results=5,
+            sort_by=arxiv.SortCriterion.Relevance,
+        )
+        out = []
+        for r in arxiv.Client().results(search):
+            authors = ", ".join(a.name for a in r.authors[:4])
+            out.append(f"{r.title}\n{authors}\n{r.entry_id}\n{r.summary[:400]}")
+        return "\n\n".join(out) if out else "No papers found."
+    except Exception as e:
+        return f"arxiv_search error: {e}"
 
-    search = arxiv.Search(
-        query=query, max_results=3, sort_by=arxiv.SortCriterion.Relevance
-    )
-    out = []
-    for r in arxiv.Client().results(search):
-        authors = ", ".join(a.name for a in r.authors)
-        out.append(f"{r.title}\n{authors}\n{r.summary}")
-    return "\n\n".join(out) if out else "No papers found."
 
-
-# The shared tool set. Topologies import this, never their own.
 TOOLS = [web_search, arxiv_search]

@@ -10,6 +10,7 @@ dependencies = [
     "ddgs>=6.0",
     "arxiv>=2.1",
     "python-dotenv>=1.0",
+    "tavily-python>=0.7.26",
 ]
 
 [project.optional-dependencies]

@@ -3,6 +3,7 @@ plotly
 langgraph
 langchain-core
 langchain-groq
+tavily-python
 ddgs
 arxiv
 python-dotenv
