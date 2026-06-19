@@ -1,0 +1,115 @@
+{
+  "topologies": {
+    "multi_agent": {
+      "score": 0.95,
+      "tokens": 3809,
+      "latency": 34.1,
+      "n": 10
+    },
+    "plan_execute": {
+      "score": 0.95,
+      "tokens": 7364,
+      "latency": 69.4,
+      "n": 10
+    },
+    "react": {
+      "score": 0.95,
+      "tokens": 2244,
+      "latency": 31.0,
+      "n": 10
+    },
+    "self_reflective": {
+      "score": 0.55,
+      "tokens": 3196,
+      "latency": 33.3,
+      "n": 10
+    },
+    "single_shot": {
+      "score": 0.5,
+      "tokens": 843,
+      "latency": 2.5,
+      "n": 10
+    }
+  },
+  "pareto": [
+    "react",
+    "single_shot"
+  ],
+  "categories": [
+    "comparison",
+    "multi_hop",
+    "quantitative",
+    "recent",
+    "temporal",
+    "tool_use"
+  ],
+  "category_scores": {
+    "multi_agent": {
+      "comparison": 1.0,
+      "multi_hop": 1.0,
+      "quantitative": 1.0,
+      "recent": 0.9,
+      "temporal": 1.0,
+      "tool_use": 1.0
+    },
+    "plan_execute": {
+      "comparison": 1.0,
+      "multi_hop": 1.0,
+      "quantitative": 1.0,
+      "recent": 0.9,
+      "temporal": 1.0,
+      "tool_use": 1.0
+    },
+    "react": {
+      "comparison": 1.0,
+      "multi_hop": 1.0,
+      "quantitative": 1.0,
+      "recent": 0.9,
+      "temporal": 1.0,
+      "tool_use": 1.0
+    },
+    "self_reflective": {
+      "comparison": 1.0,
+      "multi_hop": 1.0,
+      "quantitative": 1.0,
+      "recent": 0.1,
+      "temporal": 1.0,
+      "tool_use": 1.0
+    },
+    "single_shot": {
+      "comparison": 1.0,
+      "multi_hop": 1.0,
+      "quantitative": 1.0,
+      "recent": 0.0,
+      "temporal": 1.0,
+      "tool_use": 1.0
+    }
+  },
+  "judge_validation": {
+    "n": 50,
+    "agreement": 0.98,
+    "kappa": 0.95,
+    "labels": [
+      "CORRECT",
+      "PARTIAL",
+      "INCORRECT"
+    ],
+    "confusion": [
+      [
+        37,
+        1,
+        0
+      ],
+      [
+        0,
+        3,
+        0
+      ],
+      [
+        0,
+        0,
+        9
+      ]
+    ]
+  }
+}

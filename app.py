@@ -1,0 +1,95 @@
+"""Voyager — Streamlit app.
+
+Tab 1 (this build): Evaluations dashboard, rendered from data/eval_summary.json
+(committed), so it loads instantly with no API calls — works locally and on
+Hugging Face Spaces.
+
+    uv run streamlit run app.py
+"""
+import json
+from pathlib import Path
+
+import plotly.graph_objects as go
+import streamlit as st
+
+st.set_page_config(page_title="Voyager — Agent Topology Evaluation", layout="wide")
+SUMMARY = Path("data/eval_summary.json")
+
+
+@st.cache_data
+def load() -> dict:
+    return json.loads(SUMMARY.read_text())
+
+
+st.title("Voyager — Agent Topology Evaluation")
+st.caption(
+    "Five agent topologies · one shared model (qwen3-32b) · graded by a "
+    "human-validated LLM judge (gpt-oss-120b)."
+)
+
+if not SUMMARY.exists():
+    st.warning("No eval summary found. Run `uv run python -m voyager.eval.export` first.")
+    st.stop()
+
+s = load()
+topo = s["topologies"]
+rows = sorted(topo.items(), key=lambda kv: -kv[1]["score"])
+
+jv = s.get("judge_validation")
+if jv:
+    st.subheader("Is the judge trustworthy?")
+    c1, c2, c3 = st.columns(3)
+    c1.metric("Judge ↔ human (Cohen's κ)", jv["kappa"])
+    c2.metric("Raw agreement", f"{jv['agreement'] * 100:.0f}%")
+    c3.metric("Human-labelled pairs", jv["n"])
+    st.caption(
+        "The judge is a different model family from the agents and was validated "
+        "against blind human labels. Everything below depends on this number."
+    )
+
+st.subheader("Per-topology results")
+table = [{
+    "topology": t,
+    "score": v["score"],
+    "mean tokens": v["tokens"],
+    "mean latency (s)": v["latency"],
+    "Pareto": "★" if t in s["pareto"] else "",
+    "n": v["n"],
+} for t, v in rows]
+st.dataframe(table, use_container_width=True, hide_index=True)
+
+col_l, col_r = st.columns(2)
+
+with col_l:
+    st.subheader("Quality vs cost")
+    fig = go.Figure()
+    for t, v in topo.items():
+        on = t in s["pareto"]
+        fig.add_trace(go.Scatter(
+            x=[v["tokens"]], y=[v["score"]], mode="markers+text",
+            text=[t], textposition="top center",
+            marker=dict(size=18 if on else 12,
+                        symbol="star" if on else "circle"),
+            name=t,
+        ))
+    fig.update_layout(xaxis_title="mean tokens (cost) →",
+                      yaxis_title="mean score (quality) →",
+                      showlegend=False, height=430,
+                      margin=dict(l=10, r=10, t=10, b=10))
+    st.plotly_chart(fig, use_container_width=True)
+    st.caption("Top-left is best. ★ = Pareto-optimal (nothing is both better and cheaper).")
+
+with col_r:
+    st.subheader("Score by topology × category")
+    cats = s["categories"]
+    cs = s["category_scores"]
+    ylabels = [t for t, _ in rows]
+    z = [[cs[t].get(c) for c in cats] for t in ylabels]
+    text = [["" if val is None else f"{val:.2f}" for val in row] for row in z]
+    fig2 = go.Figure(data=go.Heatmap(
+        z=z, x=cats, y=ylabels, zmin=0, zmax=1, colorscale="RdYlGn",
+        text=text, texttemplate="%{text}", showscale=False,
+    ))
+    fig2.update_layout(height=430, margin=dict(l=10, r=10, t=10, b=10))
+    st.plotly_chart(fig2, use_container_width=True)
+    st.caption("Differentiation appears only in the post-cutoff 'recent' column.")
