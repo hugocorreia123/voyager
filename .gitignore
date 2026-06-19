@@ -6,3 +6,4 @@ __pycache__/
 runs/
 *.sqlite
 .DS_Store
+.DS_Store

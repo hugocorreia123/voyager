@@ -14,6 +14,13 @@ pinned: false
 
 Building one agent is a weekend. The hard, rare part is *measuring* agents: designing an evaluation you can actually trust, and then using it to say which agent design wins, on which kind of task, and at what cost. That evaluation — not the agents — is the point of this project.
 
+<p align="center">
+  <a href="https://huggingface.co/spaces/hugocorreia123/voyager" target="_blank" rel="noopener noreferrer">
+    <img src="docs/dashboard.png" alt="Voyager evaluations dashboard — judge validation, Pareto frontier, and category heatmap" width="850"/>
+  </a>
+</p>
+<p align="center"><sub><b><a href="https://huggingface.co/spaces/hugocorreia123/voyager" target="_blank" rel="noopener noreferrer">▶ Try the live demo on Hugging Face Spaces</a></b></sub></p>
+
 ---
 
 ## Headline findings
@@ -76,9 +83,19 @@ All share the same model and tools, so measured differences are attributable to 
 
 ---
 
+## Live demo
+
+Type a question, pick a topology, and watch the agent run with full instrumentation — answer, steps, tokens, latency, tool calls, and trace. [Open it on Hugging Face Spaces](https://huggingface.co/spaces/hugocorreia123/voyager).
+
+<p align="center">
+  <img src="docs/live_demo.png" alt="Voyager live agent demo — run any topology on your own question" width="850"/>
+</p>
+
+---
+
 ## Setup
 
-Requires [uv](https://docs.astral.sh/uv/) and a free [Groq API key](https://console.groq.com/keys).
+Requires [uv](https://docs.astral.sh/uv/) and a free [Groq API key](https://console.groq.com/keys). Optionally set `TAVILY_API_KEY` for reliable web search from any host (falls back to DuckDuckGo if unset).
 
 ```bash
 cp .env.example .env          # paste your GROQ_API_KEY
@@ -117,7 +134,7 @@ uv run python -m voyager.eval.analysis      # per-topology scores, cost, Pareto 
 ```
 voyager/
 ├── config.py                 # shared LLM (one model across all topologies — a methodological rule)
-├── tools.py                  # shared tools: web_search (DuckDuckGo), arxiv_search
+├── tools.py                  # shared tools: web_search (Tavily, ddgs fallback), arxiv_search
 ├── cli.py                    # run one question through a chosen topology
 ├── benchmark.py              # load the benchmark (stable, verifiable ground truth)
 ├── topologies/
@@ -131,7 +148,7 @@ voyager/
     └── analysis.py           # per-topology quality/cost, Pareto frontier
 ```
 
-**Stack:** Python · uv · LangGraph · Groq (`qwen/qwen3-32b` agents, `openai/gpt-oss-120b` judge) · DuckDuckGo + arXiv tools.
+**Stack:** Python · uv · LangGraph · Groq (`qwen/qwen3-32b` agents, `openai/gpt-oss-120b` judge) · Tavily + arXiv tools · Streamlit + Plotly.
 
 **Benchmark design.** Questions have **stable, verifiable ground truth** (no "latest/most recent" phrasings whose answer drifts), split into in-training control facts and post-cutoff facts that *require* retrieval — the latter being the only ones that discriminate between topologies.
 
@@ -139,4 +156,4 @@ voyager/
 
 ## Scope & honesty
 
-This is a research-quality framework demonstrated on a **10-question seed benchmark (5 control + 5 research-required), single seed per run.** The results are **descriptive, not yet statistically significant** — the point so far is a *trustworthy* pipeline (validated judge, clean cost/quality accounting, reproducible), not a large-sample claim. The framework scales directly to more questions and multiple seeds; significance testing and confidence intervals are the natural next step, along with a Streamlit app for the live agent-graph view and an evals dashboard.
+This is a research-quality framework demonstrated on a **10-question seed benchmark (5 control + 5 research-required), single seed per run.** The results are **descriptive, not yet statistically significant** — the point so far is a *trustworthy* pipeline (validated judge, clean cost/quality accounting, reproducible), not a large-sample claim. The framework scales directly to more questions and multiple seeds; significance testing and confidence intervals are the natural next step.
