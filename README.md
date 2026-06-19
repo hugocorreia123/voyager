@@ -1,3 +1,13 @@
+---
+title: Voyager Agent Topology Evaluation
+emoji: 🧭
+colorFrom: indigo
+colorTo: blue
+sdk: streamlit
+app_file: app.py
+pinned: false
+---
+
 # Voyager
 
 **An agentic-research platform that benchmarks five LLM agent topologies against an evaluation whose LLM judge is itself validated against human labels — Cohen's κ = 0.95.**
