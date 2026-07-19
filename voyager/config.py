@@ -14,7 +14,7 @@ from langchain_groq import ChatGroq
 load_dotenv()
 
 # Same model across every topology — this is a methodological requirement.
-DEFAULT_MODEL = "qwen/qwen3-32b"
+DEFAULT_MODEL = "openai/gpt-oss-120b"
 
 
 def get_llm(model: str = DEFAULT_MODEL, temperature: float = 0.0) -> ChatGroq:

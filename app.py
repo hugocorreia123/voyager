@@ -84,6 +84,12 @@ def render_live() -> None:
     from voyager.topologies import TOPOLOGIES
 
     st.subheader("Run an agent live")
+    st.caption(
+        "The evaluation artifacts were measured on qwen/qwen3-32b, which "
+        "Groq retired in June 2026 — live runs now use its recommended "
+        "replacement, openai/gpt-oss-120b. The Evaluations tab is "
+        "unchanged: those numbers describe the measured run."
+    )
     q = st.text_input(
         "Question",
         "What is the most recent Llama model and its benchmark results?",
