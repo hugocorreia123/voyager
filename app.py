@@ -13,7 +13,12 @@ from pathlib import Path
 import plotly.graph_objects as go
 import streamlit as st
 
+import voyager_friendly as vf
+
 st.set_page_config(page_title="Voyager — Agent Topology Evaluation", layout="wide")
+
+import voyager_theme as th
+th.inject()
 SUMMARY = Path("data/eval_summary.json")
 
 
@@ -30,17 +35,10 @@ def render_dashboard() -> None:
     topo = s["topologies"]
     rows = sorted(topo.items(), key=lambda kv: -kv[1]["score"])
 
+    vf.show_how_it_works()
     jv = s.get("judge_validation")
     if jv:
-        st.subheader("Is the judge trustworthy?")
-        c1, c2, c3 = st.columns(3)
-        c1.metric("Judge ↔ human (Cohen's κ)", jv["kappa"])
-        c2.metric("Raw agreement", f"{jv['agreement'] * 100:.0f}%")
-        c3.metric("Human-labelled pairs", jv["n"])
-        st.caption(
-            "The judge is a different model family from the agents and was "
-            "validated against blind human labels. Everything below depends on it."
-        )
+        vf.show_metrics(jv)
 
     st.subheader("Per-topology results")
     st.dataframe(
@@ -117,14 +115,22 @@ def render_live() -> None:
             st.write(result.trace)
 
 
-st.title("Voyager — Agent Topology Evaluation")
-st.caption(
-    "Five agent topologies · one shared model (qwen3-32b) · graded by a "
-    "human-validated LLM judge (gpt-oss-120b)."
+if not vf.show_welcome():
+    st.stop()
+
+th.hero(
+    "Agent Topology Evaluation",
+    "Voyager",
+    "Five agent designs, one shared model, one judge validated against "
+    "blind human labels — quality weighed against cost, not admired "
+    "in isolation.",
+    "qwen3-32b agents · gpt-oss-120b judge · κ = 0.95 vs humans",
 )
 
-tab1, tab2 = st.tabs(["Evaluations", "Live demo"])
+tab1, tab2, tab3 = st.tabs(["Evaluations", "Live demo", "❓ Help"])
 with tab1:
     render_dashboard()
 with tab2:
     render_live()
+with tab3:
+    vf.show_help()
