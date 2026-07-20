@@ -162,7 +162,13 @@ def render_live() -> None:
                    "trade-off is exactly what the Evaluations tab measures.")
 
         st.markdown("#### Answer")
-        st.markdown(result.answer)
+        if str(result.answer or "").strip():
+            st.markdown(result.answer)
+        else:
+            st.warning("The run finished but produced an empty answer — "
+                       "a known failure mode this portfolio measures "
+                       "elsewhere too. Press Run again; it usually "
+                       "completes on the next attempt.")
         if result.tool_calls:
             st.caption("tools used: " + ", ".join(result.tool_calls))
         with st.expander("trace"):

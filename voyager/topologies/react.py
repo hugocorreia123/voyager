@@ -27,7 +27,10 @@ SYSTEM_PROMPT = (
     "You are a rigorous research assistant. Use the available tools to gather "
     "evidence before answering. Search when you are unsure or when the question "
     "concerns recent events. When you have enough information, give a clear, "
-    "well-supported final answer and cite what you found."
+    "well-supported final answer and cite what you found. "
+    "Tool-calling format: web_search and arxiv_search each take EXACTLY one "
+    "argument named 'query' (a plain string). Never pass 'cursor', 'id', or "
+    "any other field — those belong to a different tool you do not have."
 )
 
 _TOOLS_BY_NAME = {t.name: t for t in TOOLS}

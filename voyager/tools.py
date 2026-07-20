@@ -16,6 +16,9 @@ from langchain_core.tools import tool
 def web_search(query: str) -> str:
     """Search the web for current information. Returns the top results as text.
 
+    Takes EXACTLY one argument: query. Do not pass cursor, id, or any
+    other field.
+
     Args:
         query: The search terms as a plain string, e.g.
             "latest Llama model benchmark results". Required.
@@ -60,6 +63,9 @@ def web_search(query: str) -> str:
 @tool
 def arxiv_search(query: str) -> str:
     """Search arXiv for academic papers. Returns titles, authors, and summaries.
+
+    Takes EXACTLY one argument: query. Do not pass cursor, id, or any
+    other field.
 
     Args:
         query: The topic or keywords as a plain string, e.g.
