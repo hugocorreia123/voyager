@@ -87,6 +87,8 @@ All share the same model and tools, so measured differences are attributable to 
 
 Type a question, pick a topology, and watch the agent run with full instrumentation — answer, steps, tokens, latency, tool calls, and trace. [Open it on Hugging Face Spaces](https://huggingface.co/spaces/hugocorreia123/voyager).
 
+The evaluation artifacts were measured on `qwen/qwen3-32b`, which Groq retired in June 2026 — live runs use its recommended replacement, `openai/gpt-oss-120b`. The Evaluations tab is unchanged: those numbers describe the measured run.
+
 <p align="center">
   <img src="docs/live_demo.png" alt="Voyager live agent demo — run any topology on your own question" width="850"/>
 </p>
