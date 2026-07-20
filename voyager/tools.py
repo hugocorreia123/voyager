@@ -40,13 +40,19 @@ def web_search(query: str) -> str:
         with DDGS() as ddgs:
             hits = list(ddgs.text(query, max_results=5))
         if not hits:
-            return "No results found."
+            return ("No results found for that query. Do not repeat the "
+                    "same search — refine the query once, or answer from "
+                    "your own knowledge and say you did.")
         return "\n\n".join(
             f"{h.get('title', '')}\n{h.get('href', '')}\n{h.get('body', '')}"
             for h in hits
         )
     except Exception as e:
-        return f"web_search error: {e}"
+        return (f"Web search is unavailable right now "
+                f"({type(e).__name__} — likely rate-limited on this "
+                "shared server). Do NOT call web_search again. Answer "
+                "from your own knowledge and state that the information "
+                "may be outdated.")
 
 
 @tool
@@ -67,9 +73,13 @@ def arxiv_search(query: str) -> str:
         for r in arxiv.Client().results(search):
             authors = ", ".join(a.name for a in r.authors[:4])
             out.append(f"{r.title}\n{authors}\n{r.entry_id}\n{r.summary[:400]}")
-        return "\n\n".join(out) if out else "No papers found."
+        return "\n\n".join(out) if out else (
+            "No papers found. Do not repeat the same search — refine "
+            "once, or answer from your own knowledge.")
     except Exception as e:
-        return f"arxiv_search error: {e}"
+        return (f"arXiv search is unavailable right now "
+                f"({type(e).__name__}). Do NOT call arxiv_search again — "
+                "answer from your own knowledge.")
 
 
 TOOLS = [web_search, arxiv_search]

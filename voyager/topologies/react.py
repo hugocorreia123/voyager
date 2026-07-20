@@ -88,7 +88,7 @@ class ReActTopology(Topology):
             ]
         }
         final = self.graph.invoke(
-            init, {"recursion_limit": self.max_steps * 2}
+            init, {"recursion_limit": max(self.max_steps * 2, 40)}
         )
         latency = time.perf_counter() - t0
 

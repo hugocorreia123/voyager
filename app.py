@@ -114,6 +114,19 @@ def render_live() -> None:
                         st.caption(f"The model emitted a malformed tool "
                                    f"call — retrying ({attempt + 1}/2)…")
                     continue
+                if ("Recursion limit" in msg
+                        or "GraphRecursionError" in type(e).__name__):
+                    st.error("The agent looped without reaching an "
+                             "answer. On this shared Space that usually "
+                             "means the free web search is rate-limited — "
+                             "every search fails, so the agent keeps "
+                             "trying. Durable fix: add a TAVILY_API_KEY "
+                             "Space secret (free tier at tavily.com) so "
+                             "search actually works here. Quick fix: "
+                             "press Run again.")
+                    with st.expander("Technical detail"):
+                        st.write(f"{type(e).__name__}: {e}")
+                    return
                 st.error("The live run failed before finishing.")
                 with st.expander("Technical detail"):
                     st.write(f"{type(e).__name__}: {e}")
