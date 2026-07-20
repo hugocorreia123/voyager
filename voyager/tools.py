@@ -14,7 +14,12 @@ from langchain_core.tools import tool
 
 @tool
 def web_search(query: str) -> str:
-    """Search the web for current information. Returns the top results as text."""
+    """Search the web for current information. Returns the top results as text.
+
+    Args:
+        query: The search terms as a plain string, e.g.
+            "latest Llama model benchmark results". Required.
+    """
     # Prefer Tavily when a key is available (reliable from datacenter IPs).
     if os.getenv("TAVILY_API_KEY"):
         try:
@@ -46,7 +51,12 @@ def web_search(query: str) -> str:
 
 @tool
 def arxiv_search(query: str) -> str:
-    """Search arXiv for academic papers. Returns titles, authors, and summaries."""
+    """Search arXiv for academic papers. Returns titles, authors, and summaries.
+
+    Args:
+        query: The topic or keywords as a plain string, e.g.
+            "agent topology evaluation LLM". Required.
+    """
     try:
         import arxiv
         search = arxiv.Search(

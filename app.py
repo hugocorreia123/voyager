@@ -99,19 +99,44 @@ def render_live() -> None:
                      index=names.index("react") if "react" in names else 0)
 
     if st.button("Run", type="primary"):
-        try:
-            with st.spinner(f"Running {t} … (plan-execute and multi-agent can take a while)"):
-                result = TOPOLOGIES[t]().run(q)
-        except Exception as e:
-            st.error(f"{type(e).__name__}: {e}")
-            st.info("Live runs need GROQ_API_KEY (a Space secret, or .env locally).")
+        result, last_err = None, None
+        for attempt in range(3):
+            try:
+                with st.spinner(f"Running {t} … (plan-execute and "
+                                "multi-agent can take a while)"):
+                    result = TOPOLOGIES[t]().run(q)
+                break
+            except Exception as e:
+                msg = str(e)
+                if "tool_use_failed" in msg or "tool call validation" in msg.lower():
+                    last_err = e
+                    if attempt < 2:
+                        st.caption(f"The model emitted a malformed tool "
+                                   f"call — retrying ({attempt + 1}/2)…")
+                    continue
+                st.error("The live run failed before finishing.")
+                with st.expander("Technical detail"):
+                    st.write(f"{type(e).__name__}: {e}")
+                st.info("Live runs need GROQ_API_KEY (a Space secret, "
+                        "or .env locally).")
+                return
+        if result is None:
+            st.error("The model produced a malformed tool call three "
+                     "times in a row — press Run again, or try another "
+                     "topology. This is a quirk of the replacement "
+                     "model's tool calling, not of the agent design.")
+            with st.expander("Technical detail"):
+                st.write(f"{type(last_err).__name__}: {last_err}")
             return
 
         c1, c2, c3, c4 = st.columns(4)
-        c1.metric("steps", result.steps)
-        c2.metric("tokens", result.total_tokens)
-        c3.metric("latency (s)", f"{result.latency_s:.1f}")
-        c4.metric("tool calls", len(result.tool_calls))
+        c1.metric("Steps", result.steps)
+        c2.metric("Tokens", result.total_tokens)
+        c3.metric("Latency", f"{result.latency_s:.1f} s")
+        c4.metric("Tool calls", len(result.tool_calls))
+        st.caption("**Means:** what the answer cost. Fewer steps and "
+                   "tokens at the same quality is the whole game — that "
+                   "trade-off is exactly what the Evaluations tab measures.")
 
         st.markdown("#### Answer")
         st.markdown(result.answer)
