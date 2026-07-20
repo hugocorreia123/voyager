@@ -114,6 +114,16 @@ def render_live() -> None:
                         st.caption(f"The model emitted a malformed tool "
                                    f"call — retrying ({attempt + 1}/2)…")
                     continue
+                if "rate_limit_exceeded" in msg or "Request too large" in msg:
+                    st.error("Groq's free tier caps this model at 8,000 "
+                             "tokens per minute, and the run's context "
+                             "grew past it. Tool outputs are now trimmed "
+                             "to stay under — press Run again; if it "
+                             "repeats immediately, wait one minute (the "
+                             "limit resets every minute).")
+                    with st.expander("Technical detail"):
+                        st.write(f"{type(e).__name__}: {e}")
+                    return
                 if ("Recursion limit" in msg
                         or "GraphRecursionError" in type(e).__name__):
                     st.error("The agent looped without reaching an "

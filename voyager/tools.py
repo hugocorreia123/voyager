@@ -25,10 +25,11 @@ def web_search(query: str) -> str:
         try:
             from tavily import TavilyClient
             client = TavilyClient(api_key=os.environ["TAVILY_API_KEY"])
-            results = client.search(query, max_results=5).get("results", [])
+            results = client.search(query, max_results=3).get("results", [])
             if results:
                 return "\n\n".join(
-                    f"{r.get('title', '')}\n{r.get('url', '')}\n{r.get('content', '')}"
+                    f"{r.get('title', '')}\n{r.get('url', '')}\n"
+                    f"{(r.get('content', '') or '')[:350]}"
                     for r in results
                 )
         except Exception:
@@ -38,13 +39,14 @@ def web_search(query: str) -> str:
     try:
         from ddgs import DDGS
         with DDGS() as ddgs:
-            hits = list(ddgs.text(query, max_results=5))
+            hits = list(ddgs.text(query, max_results=3))
         if not hits:
             return ("No results found for that query. Do not repeat the "
                     "same search — refine the query once, or answer from "
                     "your own knowledge and say you did.")
         return "\n\n".join(
-            f"{h.get('title', '')}\n{h.get('href', '')}\n{h.get('body', '')}"
+            f"{h.get('title', '')}\n{h.get('href', '')}\n"
+            f"{(h.get('body', '') or '')[:350]}"
             for h in hits
         )
     except Exception as e:
@@ -66,7 +68,7 @@ def arxiv_search(query: str) -> str:
     try:
         import arxiv
         search = arxiv.Search(
-            query=query, max_results=5,
+            query=query, max_results=3,
             sort_by=arxiv.SortCriterion.Relevance,
         )
         out = []
