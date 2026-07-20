@@ -108,7 +108,10 @@ def render_live() -> None:
                 break
             except Exception as e:
                 msg = str(e)
-                if "tool_use_failed" in msg or "tool call validation" in msg.lower():
+                if ("tool_use_failed" in msg
+                        or "tool call validation" in msg.lower()
+                        or "output_parse_failed" in msg
+                        or "Parsing failed" in msg):
                     last_err = e
                     if attempt < 2:
                         st.caption(f"The model emitted a malformed tool "
